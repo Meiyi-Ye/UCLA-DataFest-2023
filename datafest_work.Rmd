@@ -1,0 +1,183 @@
+---
+title: "datafest_work"
+author: "Meiyi Ye"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+# 2022 Findings
+
+https://www.statsamerica.org/sip/rank_list.aspx?rank_label=pop1
+
+```{r}
+population_data <- read.csv("Sheet 2-Table 1.csv")
+head(population_data)
+```
+
+```{r}
+population_data$Population <- gsub(",", "", population_data$Population)
+```
+
+```{r}
+population_data <- population_data[,-1]
+```
+
+```{r}
+sort(population_data$State)
+```
+
+```{r}
+clients_data <- read.csv("clients.csv")
+clients_data
+```
+
+```{r}
+clients_data$CreatedUtc <- substr(clients_data$CreatedUtc, 1, 4)  #keep only the year of case
+```
+
+```{r}
+head(clients_data)
+```
+
+```{r}
+table(clients_data$CreatedUtc)
+```
+
+```{r}
+is_2022 <- which(clients_data$CreatedUtc == 2022)
+clients_2022_data <- clients_data[is_2022,]
+nrow(clients_2022_data)
+```
+
+```{r}
+for (i in which(clients_2022_data$StateName == "ABA Federal")){
+  clients_2022_data$StateName[i] <- clients_2022_data$County[i]
+}
+
+table(clients_2022_data$StateName)
+```
+
+```{r}
+sorted_population <- data.frame("AK" = 3045637, "AL" = 5074296, "AR" = 3045637, "AZ" = 7359197, "CA" = 39029342,
+           "CT" = 3626205, "FL" = 22244823, "GA" = 10912876, "HI" = 1440196, "IA" = 3200517,
+           "IL" = 12582032, "IN" = 6833037, "LA" = 4590241, "MA" = 6981974, "MD" = 6164660,
+           "ME" = 1385340, "MO" = 6177957, "MS" = 2940057, "NC" = 10698973, "NE" = 1967923,
+           "NH" = 1395231, "NJ" = 9261699, "NM" = 2113344, "NY" = 19677151, "OK" = 4019800,
+           "PA" = 12972008, "SC" = 5282634, "SD" = 909824, "TN" = 7051339, "TX" = 30029572,
+           "US" = 1, "UT" = 3380800, "VA" = 8683619, "VT" = 647064, "WI" = 5892539, 
+           "WV" = 1775156, "WY" = 581381)
+```
+
+```{r}
+stateorder <- sort(population_data$State[population_data$State %in% clients_2022_data$StateName])
+stateorder
+```
+
+```{r}
+population_data <- population_data[population_data$State %in% stateorder,]
+population_data
+```
+
+```{r}
+library(dplyr)
+```
+
+```{r}
+population_data <- as_tibble(population_data) %>% group_by(State) %>% arrange(.by_group = TRUE)
+```
+
+```{r}
+head(population_data)
+```
+
+```{r}
+as.numeric(population_data$Population)
+```
+
+```{r}
+table(clients_2022_data$StateName)
+```
+
+
+```{r}
+table(clients_2022_data$StateName) / as.numeric(population_data$Population)
+```
+
+```{r}
+rate_by_states_2022 <- (table(clients_2022_data$StateName) / as.numeric(population_data$Population)) * 10000   #normalize
+```
+
+```{r}
+rate_by_states_2022 <- data.frame(rate_by_states_2022)
+```
+
+```{r}
+#write.csv(rate_by_states_2022, "rate_by_states_2022.csv")
+```
+
+https://www.justice.gov/ust/eo/bapcpa/20220401/bci_data/median_income_table.htm
+
+```{r}
+mean_income_data_2022 <- read.csv("mean_household_incomes.csv", header = TRUE)
+head(mean_income_data)
+```
+
+```{r}
+ colnames(mean_income_data_2022) <- c("States", "One_Earner", "Two_People", "Three_People", "Four_People")
+```
+
+```{r}
+head((mean_income_data))
+```
+
+```{r}
+mean_income_data_2022 <- as_tibble(mean_income_data_2022) %>% group_by(States) %>% 
+  summarise(avg_income = (One_Earner + Two_People + Three_People + Four_People) / 4 )
+```
+
+```{r}
+mean_income_data_2022
+```
+
+```{r}
+#write.csv(mean_income_data_2022, "mean_income_2022.csv")
+```
+
+```{r}
+poverty_rate_2022 <- read.csv("poverty_rate_2022.csv")
+head(poverty_rate_2022)
+```
+
+```{r}
+poverty_rate_2022$Poverty.Rate <- gsub("%", "", poverty_rate_2022$Poverty.Rate)
+```
+
+https://lasalle-academy.libguides.com/ourworldpoverty/demographics
+
+```{r}
+head(poverty_rate_2022)
+```
+
+```{r}
+poverty_rate_2022$Poverty.Rate <- as.numeric(poverty_rate_2022$Poverty.Rate)
+```
+
+```{r}
+poverty_rate_2022$Poverty.Rate <- (poverty_rate_2022$Poverty.Rate / 100)
+```
+
+```{r}
+head(poverty_rate_2022)
+```
+
+```{r}
+#write.csv(poverty_rate_2022, "us_poverty_rate_2022.csv")
+```
+
+# 2021
+
+```{r}
+#read.csv("2021_us_states_population.csv")
+```
+
+https://worldpopulationreview.com/state-rankings/most-educated-states
